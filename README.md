@@ -7,7 +7,7 @@ MBDM is a set of MATLAB functions that can be used to construct and solve a mult
 ## Examples
 
 ### Wind Turbine
-![](gifs/WindTubine_Kinematic.gif)
+![](gifs/WindTubine_Kinematic_2.gif)
 
 ### Slider-Crank 3D
 ![](gifs/Slider_Crank_3D_Kinematic.gif)
