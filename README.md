@@ -6,7 +6,7 @@ MBDM is a set of MATLAB functions that can be used to construct and solve a mult
 
 ## Documentation
 
-Documentation is in from of [compiled pdf file](./DOCS/TN_MBDM.pdf).
+Documentation is in form of [compiled pdf file](./DOCS/TN_MBDM.pdf).
 It covers definition of bodies and joints, and basic derivation of all equations. 
 
 ## Examples
