@@ -12,7 +12,7 @@ It covers definition of bodies and joints, and basic derivation of all equations
 ## Examples
 
 ### Wind Turbine
-![](gifs/WindTubine_Kinematic_2.gif)
+![](gifs/WindTubine_Kinematic_3.gif)
 
 ### Slider-Crank 3D
 ![](gifs/Slider_Crank_3D_Kinematic.gif)

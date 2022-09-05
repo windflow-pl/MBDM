@@ -1,8 +1,11 @@
 function [q_out,DPhi,Phi_u,Phi_v,er] =  N_R_dynamic(q,q_prime,n,joint,nBody,nJoint, nCon, t,dt)
 % [q_out,er] = N_R_dynamic(q,n,joint,nBody,nJoint, nCon, t)
-    tolq=1.0e-5;
-    tolf=1.0e-5;
-    steps = 200;
+    tolq=1.0e-3;
+    tolf=1.0e-3;
+    steps = 300;
+    relax.a = [0.5,0.25,0.125,0.0625,0.03125];
+    relax.step = [50,100,150,200,250];
+    relax.index = 1;
     % number of independent variables
     nind = 7*nBody-nCon;
     % ALLOCATE
@@ -13,8 +16,8 @@ function [q_out,DPhi,Phi_u,Phi_v,er] =  N_R_dynamic(q,q_prime,n,joint,nBody,nJoi
     q_out = q;
     % ==== correct q with velocities to get closer to solution
 %     m=0;
-%     for i=1:7*nBody      
-%         if (m<nind && i==n(m+1,1))             
+%     for i=1:7*nBody
+%         if (m<nind && i==n(m+1,1))
 %         else
 %             q_out(i,1) = q_out(i,1) + q_prime(i,1)*dt;
 %         end
@@ -25,25 +28,25 @@ function [q_out,DPhi,Phi_u,Phi_v,er] =  N_R_dynamic(q,q_prime,n,joint,nBody,nJoi
     Phi_v = zeros(nCon,7*nBody-nCon);
     % allocate u and v
     u = zeros(nCon,1);
-    v = zeros(7*nBody-nCon,1);    
-    for k=1:steps 
+    v = zeros(7*nBody-nCon,1);
+    for k=1:steps
         % calc Phi
         [Phi, er] = calc_Phi(joint,q_out,t,nBody,nJoint,nCon);
         if er==1
            fprintf('ERROR: angle has imaginary part in N-R\n');
-           return; 
+           return;
         end
         % check if Phi[i]<tolf
         j=0;
         for i=1:nCon
             if (abs(Phi(i,1))>=tolf) j=1; end
         end
-        if (j==0) 
+        if (j==0)
 %             sprintf('N-R reached conv in tolf\n')
-            break; 
+            break;
         end
         % place [-Phi] as a last column of DPhi
-        for i=1:nCon           
+        for i=1:nCon
             DPhi(i,7*nBody+1) = -1.0*Phi(i,1);
         end
         % calc Phi_q
@@ -58,7 +61,7 @@ function [q_out,DPhi,Phi_u,Phi_v,er] =  N_R_dynamic(q,q_prime,n,joint,nBody,nJoi
                 m=m+1;
             else
                 l=l+1;
-                Phi_u(:,l) = Phi_q(:,i); 
+                Phi_u(:,l) = Phi_q(:,i);
             end
         end
         % extract u and v
@@ -70,7 +73,7 @@ function [q_out,DPhi,Phi_u,Phi_v,er] =  N_R_dynamic(q,q_prime,n,joint,nBody,nJoi
                 m=m+1;
             else
                 l=l+1;
-                u(l,1) = q_out(i,1); 
+                u(l,1) = q_out(i,1);
             end
         end
         % place Phi_u and Phi_v in DPhi
@@ -96,32 +99,56 @@ function [q_out,DPhi,Phi_u,Phi_v,er] =  N_R_dynamic(q,q_prime,n,joint,nBody,nJoi
         end
         % ================ solve
         [A, loc_indx, er] = RowReducedEchelonForm(DPhi,1);
-        if er==1           
-           return; 
+        if er==1
+           return;
         end
-        dsol = get_solution(A, 7*nBody,7*nBody+1,loc_indx); 
+        dsol = get_solution(A, 7*nBody,7*nBody+1,loc_indx);
         % check if dsol<tolq
         j=0;
         for i=1:nCon
-            if(abs(dsol(i)) >=tolq) j=1; end  
-        end        
-        if (j==0) 
-%             sprintf('N-R reached conv in tolq\n') 
-            break; 
-        end        
-        % UPDATE
-        dep=0;
-        ind=0;
-        for i=1:7*nBody
-            if (ind<nind && i==n(ind+1,1))
-                ind=ind+1;
-                q_out(i,1) = q_out(i,1) + dsol(nCon+ind,1);                
-            else
-                dep=dep+1;
-                q_out(i,1) = q_out(i,1) + dsol(dep,1);
-            end
+            if(abs(dsol(i)) >=tolq) j=1; end
         end
-        
+        if (j==0)
+%             sprintf('N-R reached conv in tolq\n')
+            break;
+        end
+        % UPDATE
+        if k>relax.step(relax.index)
+##          k
+##          relax.a(relax.index)
+          dep=0;
+          ind=0;
+          for i=1:7*nBody
+              if (ind<nind && i==n(ind+1,1))
+                  ind=ind+1;
+                  q_out(i,1) = q_out(i,1) + dsol(nCon+ind,1)*relax.a(relax.index);
+              else
+                  dep=dep+1;
+                  q_out(i,1) = q_out(i,1) + dsol(dep,1)*relax.a(relax.index);
+              end
+          end
+        else
+          dep=0;
+          ind=0;
+          for i=1:7*nBody
+              if (ind<nind && i==n(ind+1,1))
+                  ind=ind+1;
+                  q_out(i,1) = q_out(i,1) + dsol(nCon+ind,1);
+              else
+                  dep=dep+1;
+                  q_out(i,1) = q_out(i,1) + dsol(dep,1);
+              end
+          end
+        endif
+        % UPDATE relaxation index
+        if relax.index<length(relax.step)
+          if k==relax.step(relax.index+1)
+          if k==relax.step(relax.index+1);
+            relax.index = relax.index+1;
+            fprintf('Switching relaxation index to a=%f\n',relax.a(relax.index));
+          endif
+        endif
+
 %         if k>10 && dspld == 0
 %             fprintf('N-R went over 10 stpes...\n');
 %             dspld=1;
@@ -129,12 +156,12 @@ function [q_out,DPhi,Phi_u,Phi_v,er] =  N_R_dynamic(q,q_prime,n,joint,nBody,nJoi
 % %             Phi = calc_Phi(joint,q_out,t,nBody,nJoint,nCon);
 % %             Phi
 %         end
-        
-        
+
+
         if k==steps
             er = 1;
             disp(sprintf('N-R didnt converge in %d steps. Try to increase ''steps'' or check Jakobian.\n',k));
             return;
-        end  
-    end    
+        end
+    end
 end

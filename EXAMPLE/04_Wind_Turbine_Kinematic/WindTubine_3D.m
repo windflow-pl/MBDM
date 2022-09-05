@@ -374,7 +374,7 @@ Phi = calc_Phi(joint,q,t,nBody,nJoint,nCon);
 % ======= define time step
 % =======================================
 dt = 0.1;
-t_final = 5;
+t_final = 20;
 
 % =======================================
 % ======= define tracers
@@ -479,10 +479,10 @@ for k=1:(t_final/dt+1)
 
 
     h1 = figure(1);
-    set(h1,'Position',[10 10 1024 300])
+    set(h1,'Position',[10 10 500 500])
     set(h1, 'DefaultLineLineWidth', 2);
     clf;
-    subplot (1,3,1, "align");
+    subplot (2,2,1, "align");
     plot3(blade_1(:,1),blade_1(:,2),blade_1(:,3),'o-',blade_2(:,1),blade_2(:,2),blade_2(:,3),'o-',blade_3(:,1),blade_3(:,2),blade_3(:,3),'o-',tower(:,1),tower(:,2),tower(:,3),'s-',nacelle(:,1),nacelle(:,2),nacelle(:,3),'+-',spinner(:,1),spinner(:,2),spinner(:,3),'+-',support(:,1),support(:,2),support(:,3),'s-');
     axis([-150 150 -150 150 -10 170])
     xlabel('x [m]')
@@ -493,7 +493,7 @@ for k=1:(t_final/dt+1)
     daspect([1 1 1])
     grid on
 
-    subplot (1,3,2, "align");
+    subplot (2,2,2, "align");
     plot3(blade_1(:,1),blade_1(:,2),blade_1(:,3),'o-',blade_2(:,1),blade_2(:,2),blade_2(:,3),'o-',blade_3(:,1),blade_3(:,2),blade_3(:,3),'o-',tower(:,1),tower(:,2),tower(:,3),'s-',nacelle(:,1),nacelle(:,2),nacelle(:,3),'+-',spinner(:,1),spinner(:,2),spinner(:,3),'+-',support(:,1),support(:,2),support(:,3),'s-');
     axis([-150 150 -150 150 -10 170])
     xlabel('x [m]')
@@ -504,7 +504,7 @@ for k=1:(t_final/dt+1)
     daspect([1 1 1])
     grid on
 
-    subplot (1,3,3, "align");
+    subplot (2,2,[3 4], "align");
     plot3(blade_1(:,1),blade_1(:,2),blade_1(:,3),'o-',blade_2(:,1),blade_2(:,2),blade_2(:,3),'o-',blade_3(:,1),blade_3(:,2),blade_3(:,3),'o-',tower(:,1),tower(:,2),tower(:,3),'s-',nacelle(:,1),nacelle(:,2),nacelle(:,3),'+-',spinner(:,1),spinner(:,2),spinner(:,3),'+-',support(:,1),support(:,2),support(:,3),'s-');
     axis([-150 150 -150 150 -10 170])
     xlabel('x [m]')
